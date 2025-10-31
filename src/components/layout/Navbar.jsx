@@ -1,6 +1,6 @@
 // src/components/layout/Navbar.jsx
 
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
   { name: "Jobs Board", path: "/jobs" },
@@ -10,13 +10,6 @@ const navItems = [
 
 function Navbar() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const user = localStorage.getItem("user"); // Check login status
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
 
   return (
     <nav className="backdrop-blur-md bg-white/80 shadow-md sticky top-0 z-50 border-b border-gray-100">
@@ -57,16 +50,6 @@ function Navbar() {
                 </Link>
               );
             })}
-
-            {/*  Logout Button (Only shown when logged in) */}
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="ml-4 bg-linear-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-red-600 hover:to-pink-600 shadow-md transition-all duration-200"
-              >
-                Logout
-              </button>
-            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -93,5 +76,3 @@ function Navbar() {
 }
 
 export default Navbar;
-
-

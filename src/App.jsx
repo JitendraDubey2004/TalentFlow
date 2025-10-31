@@ -1,7 +1,5 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import Login from "./pages/auth/Login";
-import Signup from "./pages/auth/Signup";
 import HomePage from "./pages/HomePage";
 import JobsBoard from "./pages/Jobs/JobsBoard";
 import JobDetails from "./pages/Jobs/JobDetails";
@@ -10,22 +8,18 @@ import CandidateProfile from "./pages/Candidate/CandidateProfile";
 import AssessmentsPage from "./pages/Assessment/AssessmentsPage";
 import AssessmentBuilder from "./pages/Assessment/AssessmentBuilder";
 import AssessmentFormRuntime from "./pages/Assessment/AssessmentFormRuntime";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <Routes>
-      {/* Public Auth pages */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-
-      {/* Protected Routes */}
+  
+  
       <Route
         path="/"
         element={
-          <ProtectedRoute>
+       
             <Layout />
-          </ProtectedRoute>
+     
         }
       >
         <Route index element={<HomePage />} />
