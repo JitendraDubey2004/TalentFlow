@@ -15,18 +15,6 @@ TalentFlow streamlines the hiring process by allowing recruiters to:
 
 ---
 
-## 🧠 Login Credentials
-
-To access the application, use the following credentials:
-
-| **Email** | **Password** |
-|------------|--------------|
-| **b22ee009@nitm.ac.in** | **123456** |
-
-These credentials are required for login during local testing or demo purposes.
-
----
-
 ## 🛠️ Setup Instructions
 
 ### 1️⃣ Clone the Repository
@@ -60,7 +48,6 @@ src/
 │   │   └── dexie.js              # Local IndexedDB setup using Dexie
 │   ├── handlers/                 # API request handlers for MSW
 │   │   ├── assessmentHandlers.js
-│   │   ├── authHandler.js
 │   │   ├── candidatesHandlers.js
 │   │   └── jobsHandlers.js
 │   ├── msw/
@@ -130,12 +117,6 @@ src/
 
 ---
 
-## 🔐 Authentication & Protected Routes
-
-- Users must log in to access protected pages.
-- Auth data (token) is stored in `localStorage`.
-- `ProtectedRoute.jsx` ensures unauthorized users are redirected to `/login`.
-
 ---
 
 ## 🧠 Known Issues / Fixes
@@ -174,10 +155,5 @@ Feel free to use, modify, and distribute it for educational or personal purposes
 
 ---
 
-### 🧩 Quick Login Info
-> Email: **b22ee009@nitm.ac.in**  
-> Password: **123456**
-
----
 
 **Run → Build → Hire Smarter 🚀**
