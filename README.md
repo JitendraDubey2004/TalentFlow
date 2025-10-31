@@ -163,7 +163,7 @@ src/
 **Developer:** Jitendra Dubey  
 **B.Tech, Electronics & Communication Engineering**  
 **National Institute of Technology Meghalaya**  
-📧 **b22ee009@nitm.ac.in**
+📧 **jitendradubey0122@gmail.com**
 
 ---
 
