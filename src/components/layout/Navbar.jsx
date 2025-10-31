@@ -58,7 +58,7 @@ function Navbar() {
               );
             })}
 
-            {/* ✅ Logout Button (Only shown when logged in) */}
+            {/*  Logout Button (Only shown when logged in) */}
             {user && (
               <button
                 onClick={handleLogout}
