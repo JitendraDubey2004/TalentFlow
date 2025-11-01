@@ -19,13 +19,13 @@ function AssessmentBuilder() {
     s.questions.map((q) => q.id)
   );
 
-  // ✅ Handle API base (works for both dev + production)
+  //  Handle API base 
   const API_BASE =
     import.meta.env.MODE === "development"
       ? "/api"
       : `${window.location.origin}/api`;
 
-  // === Fetch assessment ===
+  // Fetch assessment 
   const fetchAssessment = useCallback(async () => {
     try {
       setLoading(true);
@@ -56,7 +56,7 @@ function AssessmentBuilder() {
     fetchAssessment();
   }, [fetchAssessment]);
 
-  // === CRUD Logic ===
+  //  CRUD Logic 
   const updateQuestion = useCallback((sectionId, updatedQuestion) => {
     setBuilderState((prev) => {
       const newSections = prev.sections.map((s) =>
@@ -110,7 +110,7 @@ function AssessmentBuilder() {
     }
   };
 
-  // === Section + Question handlers ===
+  // Section + Question handlers 
   const addSection = () => {
     setBuilderState((prev) => ({
       ...prev,
@@ -168,7 +168,7 @@ function AssessmentBuilder() {
       ),
     }));
 
-  // === UI ===
+  // UI 
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen text-indigo-600 text-lg">
@@ -308,7 +308,7 @@ function AssessmentBuilder() {
           )}
         </Motion.div>
 
-        {/* --- Live Preview --- */}
+        {/*  Live Preview  */}
         <Motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
