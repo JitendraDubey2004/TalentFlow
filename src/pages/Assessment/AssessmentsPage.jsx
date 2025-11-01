@@ -1,4 +1,5 @@
 // src/pages/Assessment/AssessmentsPage.jsx
+
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
@@ -18,36 +19,40 @@ function AssessmentsPage() {
   };
 
   const fetchAllAssessments = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    let assessmentList = [];
-
     try {
+      setLoading(true);
+      setError(null);
+
+      // ✅ Always prefix with relative URL (works in production too)
       const jobsResponse = await fetch("/api/jobs?pageSize=1000&status=active");
+
       if (!jobsResponse.ok) throw new Error("Failed to fetch jobs.");
+
       const jobData = await jobsResponse.json();
       const jobIds = jobData.data.map((job) => job.id);
 
+      // ✅ Fetch assessments in parallel for each job
       const assessmentPromises = jobIds.map(async (jobId) => {
-        const assessmentResponse = await fetch(`/api/assessments/${jobId}`);
-        if (!assessmentResponse.ok) return null;
-        const assessment = await assessmentResponse.json();
+        const res = await fetch(`/api/assessments/${jobId}`);
+        if (!res.ok) return null;
 
-        if (assessment.sections && assessment.sections.length > 0) {
+        const assessment = await res.json();
+
+        if (assessment?.sections?.length > 0) {
           const job = jobData.data.find((j) => j.id === jobId);
           return {
             ...assessment,
             title: job?.title || `Assessment for Job #${jobId}`,
-            jobId: jobId,
+            jobId,
           };
         }
         return null;
       });
 
       const results = await Promise.all(assessmentPromises);
-      assessmentList = results.filter((a) => a !== null);
-      setAssessments(assessmentList);
+      setAssessments(results.filter(Boolean));
     } catch (err) {
+      console.error("Error fetching assessments:", err);
       setError(err.message || "Failed to fetch assessment data.");
     } finally {
       setLoading(false);
@@ -58,24 +63,22 @@ function AssessmentsPage() {
     fetchAllAssessments();
   }, [fetchAllAssessments]);
 
-  if (loading) {
+  if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen text-indigo-600 text-lg">
         Loading Assessments...
       </div>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
       <div className="flex justify-center items-center min-h-screen text-red-600 text-lg">
         Error: {error}
       </div>
     );
-  }
 
   return (
-    <div className="w-screen min-h-[calc(100vh-64px)] bg-linear-to-br from-gray-50 via-white to-indigo-50 p-8 overflow-y-auto">
+    <div className="w-screen min-h-[calc(100vh-64px)] bg-gradient-to-br from-gray-50 via-white to-indigo-50 p-8 overflow-y-auto">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-200 pb-5">
         <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-4 md:mb-0">
@@ -87,7 +90,7 @@ function AssessmentsPage() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
           onClick={handleCreateNew}
-          className="flex items-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all"
+          className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all"
         >
           <PlusCircle size={20} />
           Create New Assessment
@@ -140,9 +143,9 @@ function AssessmentsPage() {
                   <Edit3 size={16} /> Edit
                 </Link>
 
-                <Link 
-        to={`/assessment-form/${assessment.jobId}`}
-                  className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg cursor-not-allowed"
+                <Link
+                  to={`/assessment-form/${assessment.jobId}`}
+                  className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition hover:bg-gray-300"
                 >
                   <FileText size={16} /> Open Form
                 </Link>
@@ -160,5 +163,6 @@ function AssessmentsPage() {
 }
 
 export default AssessmentsPage;
+
 
 

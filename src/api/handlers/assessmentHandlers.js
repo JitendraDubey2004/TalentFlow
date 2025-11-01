@@ -7,123 +7,142 @@ const BASE_URL = '/api';
 
 // --- Simulation Helpers ---
 const simulateLatency = (min = 200, max = 1200) => 
-    new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
+  new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 const shouldFail = (errorRate = 0.1) => Math.random() < errorRate;
 
 // --- API Endpoints ---
 
-// GET /assessments/:jobId (Retrieve Assessment Structure) [cite: 38]
+// GET /assessments/:jobId (Retrieve Assessment Structure)
 export const getAssessmentHandler = http.get(`${BASE_URL}/assessments/:jobId`, async ({ params }) => {
   const jobId = parseInt(params.jobId);
 
-  // Find the assessment linked to the jobId
   const assessment = await db.assessments.where('jobId').equals(jobId).first();
 
   if (!assessment) {
-    // Return an empty structure if none exists, signaling the builder to start fresh
-    return HttpResponse.json({ jobId, sections: [] }, { status: 200 }); 
+    return HttpResponse.json({ jobId, sections: [] }, { status: 200 });
   }
+
   return HttpResponse.json(assessment, { status: 200 });
 });
 
 
-// PUT /assessments/:jobId (Save Assessment Structure from Builder) [cite: 39]
+// PUT /assessments/:jobId (Save Assessment Structure)
 export const saveAssessmentHandler = http.put(`${BASE_URL}/assessments/:jobId`, async ({ params, request }) => {
   await simulateLatency(); 
 
   if (shouldFail(0.08)) {
-    return HttpResponse.json({ message: 'Network error, failed to save assessment structure.' }, { status: 500 });
+    return HttpResponse.json(
+      { message: 'Network error, failed to save assessment structure.' },
+      { status: 500 }
+    );
   }
-  
+
   const jobId = parseInt(params.jobId);
   const assessmentData = await request.json();
 
-  // Basic validation
   if (!assessmentData.sections) {
-    return HttpResponse.json({ message: 'Assessment must contain sections.' }, { status: 400 });
+    return HttpResponse.json(
+      { message: 'Assessment must contain sections.' },
+      { status: 400 }
+    );
   }
 
   try {
-    // Use .put() to either insert a new assessment or replace the existing one based on jobId
     const id = await db.assessments.put({
       ...assessmentData,
-      jobId: jobId, // Ensure jobId is the primary key for lookup
+      jobId: jobId,
       updatedAt: new Date().toISOString(),
     });
-    
+
     return HttpResponse.json({ success: true, id }, { status: 200 });
   } catch (error) {
-    console.error("Dexie error on saving assessment structure:", error);
-    return HttpResponse.json({ message: 'Database error during save.' }, { status: 500 });
+    console.error('Dexie error on saving assessment structure:', error);
+    return HttpResponse.json(
+      { message: 'Database error during save.' },
+      { status: 500 }
+    );
   }
 });
 
 
-// POST /assessments/:jobId/submit (Store Candidate Response Locally) [cite: 40, 24]
+// POST /assessments/:jobId/submit (Store Candidate Response Locally)
 export const submitAssessmentHandler = http.post(`${BASE_URL}/assessments/:jobId/submit`, async ({ params, request }) => {
-  await simulateLatency(); 
+  await simulateLatency();
 
   if (shouldFail(0.08)) {
-    return HttpResponse.json({ message: 'Network error, submission failed.' }, { status: 500 });
+    return HttpResponse.json(
+      { message: 'Network error, submission failed.' },
+      { status: 500 }
+    );
   }
-  
-  const jobId = parseInt(params.jobId);
-  const responseData = await request.json(); // Expected to contain candidateId and responses
 
-  // Basic response validation
+  const jobId = parseInt(params.jobId);
+  const responseData = await request.json();
+
   if (!responseData.candidateId || !responseData.responses) {
-    return HttpResponse.json({ message: 'Candidate ID and responses are required.' }, { status: 400 });
+    return HttpResponse.json(
+      { message: 'Candidate ID and responses are required.' },
+      { status: 400 }
+    );
   }
 
   try {
     const submissionRecord = {
-        jobId: jobId,
-        candidateId: responseData.candidateId,
-        responses: responseData.responses, // Store the candidate's answers
-        submissionDate: new Date().toISOString(),
-        // Optional: Store form validation status here
+      jobId: jobId,
+      candidateId: responseData.candidateId,
+      responses: responseData.responses,
+      submissionDate: new Date().toISOString(),
     };
 
-    const id = await db.assessmentResponses.add(submissionRecord); // Persistence via Dexie
-    
+    const id = await db.assessmentResponses.add(submissionRecord);
     return HttpResponse.json({ success: true, responseId: id }, { status: 201 });
   } catch (error) {
-    console.error("Dexie error on assessment submission:", error);
-    return HttpResponse.json({ message: 'Database error during submission.' }, { status: 500 });
+    console.error('Dexie error on assessment submission:', error);
+    return HttpResponse.json(
+      { message: 'Database error during submission.' },
+      { status: 500 }
+    );
   }
 });
 
 
-// ⚠️ NEW: DELETE /assessments/:jobId (Delete Assessment Structure)
+// DELETE /assessments/:jobId (Delete Assessment Structure)
 export const deleteAssessmentHandler = http.delete(`${BASE_URL}/assessments/:jobId`, async ({ params }) => {
-  await simulateLatency(); 
+  await simulateLatency();
 
-  if (shouldFail(0.05)) { // Lower error rate for destructive action
-    return HttpResponse.json({ message: 'Network error, failed to delete assessment.' }, { status: 500 });
+  if (shouldFail(0.05)) {
+    return HttpResponse.json(
+      { message: 'Network error, failed to delete assessment.' },
+      { status: 500 }
+    );
   }
-  
+
   const jobId = parseInt(params.jobId);
 
   try {
-    // Delete the assessment structure where jobId matches
     const count = await db.assessments.where('jobId').equals(jobId).delete();
-    
+
     if (count === 0) {
-        return HttpResponse.json({ message: 'Assessment not found.' }, { status: 404 });
+      return HttpResponse.json({ message: 'Assessment not found.' }, { status: 404 });
     }
-    
-    return HttpResponse.json({ success: true, message: 'Assessment deleted successfully.' }, { status: 200 });
+
+    return HttpResponse.json(
+      { success: true, message: 'Assessment deleted successfully.' },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Dexie error on deleting assessment structure:", error);
-    return HttpResponse.json({ message: 'Database error during deletion.' }, { status: 500 });
+    console.error('Dexie error on deleting assessment structure:', error);
+    return HttpResponse.json(
+      { message: 'Database error during deletion.' },
+      { status: 500 }
+    );
   }
 });
 
-
-// Array of all assessment handlers to be passed to MSW
+// Export all handlers
 export const assessmentHandlers = [
-    getAssessmentHandler,
-    saveAssessmentHandler,
-    submitAssessmentHandler,
-    deleteAssessmentHandler, 
+  getAssessmentHandler,
+  saveAssessmentHandler,
+  submitAssessmentHandler,
+  deleteAssessmentHandler,
 ];

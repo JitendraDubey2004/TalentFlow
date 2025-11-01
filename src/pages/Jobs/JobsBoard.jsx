@@ -20,6 +20,15 @@ const STATUS_COLORS = {
   archived: 'bg-amber-100 text-amber-700 border border-amber-300',
 };
 
+// ✅ Use relative base for production safety
+const getApiBase = () => {
+  if (window.location.hostname === 'localhost') {
+    return '/api';
+  }
+  // in production, your backend should handle routes correctly
+  return '/api';
+};
+
 //  Sortable Item Component
 const SortableJobItem = ({ job, onArchiveToggle, onEdit }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -43,7 +52,6 @@ const SortableJobItem = ({ job, onArchiveToggle, onEdit }) => {
       }`}
       {...attributes}
     >
-      {/* Left Side: Job Info */}
       <div className="grow" {...listeners}>
         <Link
           to={`/jobs/${job.id}`}
@@ -62,7 +70,6 @@ const SortableJobItem = ({ job, onArchiveToggle, onEdit }) => {
         </div>
       </div>
 
-      {/* Tags */}
       <div className="hidden sm:block mx-4 text-sm text-gray-500 w-1/3 text-right">
         {job.tags.map((tag) => (
           <span
@@ -74,7 +81,6 @@ const SortableJobItem = ({ job, onArchiveToggle, onEdit }) => {
         ))}
       </div>
 
-      {/* Actions */}
       <div className="flex space-x-3">
         <button
           onClick={() => onEdit(job)}
@@ -97,7 +103,6 @@ const SortableJobItem = ({ job, onArchiveToggle, onEdit }) => {
   );
 };
 
-//  Main JobsBoard Page
 function JobsBoard() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,33 +116,34 @@ function JobsBoard() {
   const [isReordering, setIsReordering] = useState(false);
 
   const jobIds = jobs.map((job) => job.id);
+  const base = getApiBase();
 
   // --- Fetch Jobs ---
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    const apiUrl = `/api/jobs?page=${page}&pageSize=${PAGE_SIZE}&search=${search}&status=${status}&sort=order`;
+    const apiUrl = `${base}/jobs?page=${page}&pageSize=${PAGE_SIZE}&search=${search}&status=${status}&sort=order`;
 
     try {
       const response = await fetch(apiUrl);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
-      setJobs(result.data);
-      setMeta(result.meta);
+      setJobs(result.data || []);
+      setMeta(result.meta || {});
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
-      setError('Failed to load jobs. Please check Dexie or mock server setup.');
+      setError('Failed to load jobs. Check backend or mock server setup.');
     } finally {
       setLoading(false);
     }
-  }, [page, search, status]);
+  }, [page, search, status, base]);
 
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
 
-  // Drag and Drop 
+  // Drag and Drop
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id || isReordering) return;
@@ -158,7 +164,7 @@ function JobsBoard() {
     setIsReordering(true);
 
     try {
-      const response = await fetch(`/api/jobs/${jobId}/reorder`, {
+      const response = await fetch(`${base}/jobs/${jobId}/reorder`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fromOrder, toOrder }),
@@ -173,7 +179,7 @@ function JobsBoard() {
     }
   };
 
-  //Handlers 
+  // Handlers
   const handleEdit = (job) => {
     setJobToEdit(job);
     setIsModalOpen(true);
@@ -210,7 +216,7 @@ function JobsBoard() {
     );
 
     try {
-      const response = await fetch(`/api/jobs/${job.id}`, {
+      const response = await fetch(`${base}/jobs/${job.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -222,7 +228,7 @@ function JobsBoard() {
     }
   };
 
-  //  UI 
+  // UI
   if (loading)
     return (
       <div className="text-center p-20 text-lg text-indigo-600 animate-pulse">
@@ -242,7 +248,6 @@ function JobsBoard() {
         📋 Jobs Board
       </h2>
 
-      {/* Search, Filter, Create */}
       <div className="flex flex-wrap justify-between items-center mb-6 p-5 bg-white/90 backdrop-blur-md border border-gray-200 shadow-md rounded-xl">
         <div className="flex flex-wrap gap-3">
           <input
@@ -307,22 +312,22 @@ function JobsBoard() {
         </SortableContext>
       </DndContext>
 
-      {/* Pagination */}
+      {/* ✅ Pagination Fix */}
       <div className="flex justify-center items-center gap-4 mt-10">
         <button
           onClick={() => setPage((p) => p - 1)}
-          disabled={page === 1 || isReordering}
+          disabled={page <= 1 || isReordering}
           className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
         >
           ← Previous
         </button>
         <span className="text-gray-700 text-sm font-medium">
-          Page {page} of {meta.totalPages || 1}
+          Page {page} of {meta?.totalPages || 1}
         </span>
         <button
           onClick={() => setPage((p) => p + 1)}
           disabled={
-            page === meta.totalPages || jobs.length === 0 || isReordering
+            page >= (meta?.totalPages || 1) || jobs.length === 0 || isReordering
           }
           className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
         >
@@ -330,7 +335,6 @@ function JobsBoard() {
         </button>
       </div>
 
-      {/* Modal */}
       <JobModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
@@ -342,3 +346,4 @@ function JobsBoard() {
 }
 
 export default JobsBoard;
+

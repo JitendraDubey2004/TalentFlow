@@ -5,13 +5,13 @@ import db from '../db/dexie';
 
 const BASE_URL = '/api';
 
+// --- Helpers ---
 const simulateLatency = (min = 200, max = 1200) =>
-  new Promise((resolve) => setTimeout(resolve, Math.random() * (max - min) + min));
+  new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
-// Injected 5-10% error rate on write endpoints.
 const shouldFail = (errorRate = 0.1) => Math.random() < errorRate;
 
-// GET /candidates?search=&stage=&page=
+// --- GET /candidates?search=&stage=&page= ---
 export const getCandidatesHandler = http.get(`${BASE_URL}/candidates`, async ({ request }) => {
   const url = new URL(request.url);
   const search = url.searchParams.get('search')?.toLowerCase() || '';
@@ -21,23 +21,23 @@ export const getCandidatesHandler = http.get(`${BASE_URL}/candidates`, async ({ 
 
   let collection = db.candidates;
 
-  //  Server-like Stage Filtering (via Dexie index)
+  // Filter by stage if provided
   if (stage) {
     collection = collection.where('stage').equals(stage);
   }
 
   let candidates = await collection.toArray();
 
-  //  Client-Side Search (Filter by name/email)
+  // Client-side search by name or email
   if (search) {
     candidates = candidates.filter(
-      (candidate) =>
-        candidate.name.toLowerCase().includes(search) ||
-        candidate.email.toLowerCase().includes(search)
+      c =>
+        c.name.toLowerCase().includes(search) ||
+        c.email.toLowerCase().includes(search)
     );
   }
 
-  //  pagination i
+  // Pagination
   const totalItems = candidates.length;
   const totalPages = Math.ceil(totalItems / pageSize);
   const start = (page - 1) * pageSize;
@@ -52,7 +52,7 @@ export const getCandidatesHandler = http.get(`${BASE_URL}/candidates`, async ({ 
   );
 });
 
-// POST /candidates (Add Candidate)
+// --- POST /candidates (Add Candidate) ---
 export const postCandidateHandler = http.post(`${BASE_URL}/candidates`, async ({ request }) => {
   await simulateLatency();
 
@@ -77,7 +77,7 @@ export const postCandidateHandler = http.post(`${BASE_URL}/candidates`, async ({
     name: newCandidateData.name,
     email: newCandidateData.email,
     stage: newCandidateData.stage || 'applied',
-    jobId: 1, // Mock job association
+    jobId: 1,
     appliedAt: new Date().toISOString(),
   };
 
@@ -85,8 +85,7 @@ export const postCandidateHandler = http.post(`${BASE_URL}/candidates`, async ({
     const id = await db.candidates.add(candidate);
     const createdCandidate = { id, ...candidate };
 
-    console.log('✅ Candidate added to DB:', createdCandidate);
-
+    console.log('✅ Candidate added:', createdCandidate);
     return HttpResponse.json({ data: createdCandidate }, { status: 201 });
   } catch (error) {
     console.error('Dexie error on candidate creation:', error);
@@ -97,7 +96,7 @@ export const postCandidateHandler = http.post(`${BASE_URL}/candidates`, async ({
   }
 });
 
-// PATCH /candidates/:candidateId (Stage Transitions)
+// --- PATCH /candidates/:candidateId (Stage Transition) ---
 export const updateCandidateHandler = http.patch(
   `${BASE_URL}/candidates/:candidateId`,
   async ({ params, request }) => {
@@ -119,14 +118,13 @@ export const updateCandidateHandler = http.patch(
         return HttpResponse.json({ message: 'Candidate not found.' }, { status: 404 });
       }
 
-      // Transaction ensures both updates (stage + timeline)
       await db.transaction('rw', db.candidates, db.candidateTimelines, async () => {
         await db.candidates.update(candidateId, updateData);
 
-        // Record stage change in timeline
+        // Record stage change
         if (updateData.stage && updateData.stage !== candidate.stage) {
           await db.candidateTimelines.add({
-            candidateId: candidateId,
+            candidateId,
             oldStage: candidate.stage,
             newStage: updateData.stage,
             timestamp: new Date().toISOString(),
@@ -138,16 +136,16 @@ export const updateCandidateHandler = http.patch(
       const updatedCandidate = await db.candidates.get(candidateId);
       return HttpResponse.json({ data: updatedCandidate }, { status: 200 });
     } catch (error) {
-      console.error(`Dexie error on candidate stage update for ID ${candidateId}:`, error);
+      console.error(`Dexie error updating candidate ${candidateId}:`, error);
       return HttpResponse.json(
-        { message: 'Database error during stage update.' },
+        { message: 'Database error during update.' },
         { status: 500 }
       );
     }
   }
 );
 
-// GET /candidates/:id/timeline
+// --- GET /candidates/:id/timeline ---
 export const getCandidateTimelineHandler = http.get(
   `${BASE_URL}/candidates/:candidateId/timeline`,
   async ({ params }) => {
@@ -158,12 +156,12 @@ export const getCandidateTimelineHandler = http.get(
       .equals(candidateId)
       .sortBy('timestamp');
 
-    // Ensure initial 'applied' stage exists
+    // Ensure initial applied stage exists
     if (timeline.length === 0) {
       const candidate = await db.candidates.get(candidateId);
       if (candidate) {
         timeline.unshift({
-          candidateId: candidateId,
+          candidateId,
           newStage: candidate.stage || 'applied',
           timestamp: candidate.appliedAt || new Date().toISOString(),
           isInitial: true,
@@ -175,10 +173,11 @@ export const getCandidateTimelineHandler = http.get(
   }
 );
 
-// Export all candidate handlers
+// --- Export All ---
 export const candidateHandlers = [
   getCandidatesHandler,
   postCandidateHandler,
   updateCandidateHandler,
   getCandidateTimelineHandler,
 ];
+

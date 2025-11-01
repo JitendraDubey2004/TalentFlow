@@ -9,7 +9,8 @@ import db from "../../api/db/dexie";
 function CandidateProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const candidateId = parseInt(id);
+  const candidateId = Number(id);
+
   const [candidate, setCandidate] = useState(null);
   const [timeline, setTimeline] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,9 +26,10 @@ function CandidateProfile() {
   };
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
     try {
+      setLoading(true);
+      setError(null);
+
       const candidateData = await db.candidates.get(candidateId);
       if (!candidateData) throw new Error("Candidate not found in local database.");
 
@@ -50,7 +52,7 @@ function CandidateProfile() {
     fetchData();
   }, [fetchData]);
 
-  //  Loading UI
+  // ✅ Loading UI
   if (loading)
     return (
       <div className="w-screen min-h-[calc(100vh-64px)] bg-gray-50 flex items-center justify-center">
@@ -60,7 +62,7 @@ function CandidateProfile() {
       </div>
     );
 
-  //  Error UI
+  // ✅ Error UI
   if (error)
     return (
       <div className="w-screen min-h-[calc(100vh-64px)] bg-gray-50 flex items-center justify-center">
@@ -70,7 +72,7 @@ function CandidateProfile() {
       </div>
     );
 
-  //  No Candidate
+  // ✅ No Candidate
   if (!candidate)
     return (
       <div className="w-screen min-h-[calc(100vh-64px)] bg-gray-50 flex flex-col items-center justify-center text-gray-600">
@@ -86,11 +88,10 @@ function CandidateProfile() {
 
   const currentStageStyle = StageStyles[candidate.stage] || StageStyles.applied;
 
- 
   return (
     <div className="w-screen min-h-[calc(100vh-64px)] bg-gray-50 flex flex-col p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto space-y-10">
-        {/* Candidate Info Card */}
+        {/* 🧑‍💼 Candidate Info Card */}
         <div className="bg-white shadow-xl rounded-2xl p-8 border-t-4 border-indigo-600 hover:shadow-indigo-100 transition-all duration-200">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -113,7 +114,7 @@ function CandidateProfile() {
           </div>
         </div>
 
-        {/* Quick Info Cards */}
+        {/* 🧾 Quick Info Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
             <h3 className="text-sm text-gray-500 mb-2">Email</h3>
@@ -133,7 +134,7 @@ function CandidateProfile() {
           </div>
         </div>
 
-        {/* Timeline & Notes */}
+        {/* 📊 Timeline & Notes */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-md border border-gray-100 p-6 hover:shadow-indigo-100 transition-all">
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -157,4 +158,5 @@ function CandidateProfile() {
 }
 
 export default CandidateProfile;
+
 

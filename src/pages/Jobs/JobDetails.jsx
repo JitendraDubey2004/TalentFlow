@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Edit3, Archive, RefreshCcw } from "lucide-react";
-import JobModal from "../../components/Modal/JobModal"; 
+import JobModal from "../../components/Modal/JobModal";
 
 function JobDetails() {
   const { jobId } = useParams();
@@ -11,24 +11,38 @@ function JobDetails() {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
       setLoading(true);
       setError(null);
+
+      // ✅ Use local API in dev, fallback JSON in production
+      const apiUrl = import.meta.env.DEV
+        ? `/api/jobs/${jobId}`
+        : `${window.location.origin}/mock/jobs.json`;
+
       try {
-        const response = await fetch(`/api/jobs/${jobId}`);
-        if (!response.ok)
-          throw new Error(`Job not found. Status: ${response.status}`);
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error(`Job not found. Status: ${response.status}`);
         const data = await response.json();
-        setJob(data);
+
+        // ✅ In production, extract job from JSON list
+        const foundJob = import.meta.env.DEV
+          ? data
+          : (data.find((j) => String(j.id) === String(jobId)) || null);
+
+        if (!foundJob) throw new Error("Job not found in data file.");
+        setJob(foundJob);
       } catch (err) {
+        console.error("Fetch job failed:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchJob();
   }, [jobId]);
 
@@ -42,38 +56,39 @@ function JobDetails() {
       )
     )
       return;
+
     try {
       const newStatus = job.status === "active" ? "archived" : "active";
-      const response = await fetch(`/api/jobs/${jobId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
 
-      if (!response.ok)
-        throw new Error("Failed to update job status. Please try again.");
-      const updatedJob = await response.json();
-      setJob(updatedJob);
+      // ✅ Only send PATCH in dev; in prod, just simulate change
+      if (import.meta.env.DEV) {
+        const response = await fetch(`/api/jobs/${jobId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (!response.ok) throw new Error("Failed to update job status.");
+        const updatedJob = await response.json();
+        setJob(updatedJob);
+      } else {
+        setJob({ ...job, status: newStatus }); // Simulate update in prod
+      }
     } catch (err) {
       alert(`Error: ${err.message}`);
     }
   };
 
-  const handleEdit = () => {
-    setIsModalOpen(true); 
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false); 
-  };
+  const handleEdit = () => setIsModalOpen(true);
+  const handleModalClose = () => setIsModalOpen(false);
 
   const handleJobSubmitted = async () => {
-   
     try {
-      const res = await fetch(`/api/jobs/${jobId}`);
-      if (res.ok) {
-        const updated = await res.json();
-        setJob(updated);
+      if (import.meta.env.DEV) {
+        const res = await fetch(`/api/jobs/${jobId}`);
+        if (res.ok) {
+          const updated = await res.json();
+          setJob(updated);
+        }
       }
     } catch (e) {
       console.error("Error refreshing job:", e);
@@ -133,7 +148,6 @@ function JobDetails() {
           {job.description || "No description provided for this job yet."}
         </p>
 
-        {/* JOB DETAILS GRID */}
         <div className="grid sm:grid-cols-2 gap-6 text-gray-700 mb-10">
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-indigo-300 transition">
             <p className="text-sm text-gray-500">Slug</p>
@@ -203,7 +217,7 @@ function JobDetails() {
         </div>
       </div>
 
-      {/*Job Edit Modal */}
+      {/* Job Edit Modal */}
       <JobModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
@@ -215,5 +229,6 @@ function JobDetails() {
 }
 
 export default JobDetails;
+
 
 

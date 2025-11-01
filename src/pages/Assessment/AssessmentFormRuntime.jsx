@@ -1,11 +1,11 @@
 // src/pages/Assessment/AssessmentFormRuntime.jsx
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
 import QuestionRenderer from "../../components/AssessmentModule/QuestionRenderer";
 
+// Utility to decide when to show conditional questions
 const shouldRenderQuestion = (question, allResponses) => {
   const { condition } = question;
   if (!condition?.targetQId) return true;
@@ -21,7 +21,7 @@ const shouldRenderQuestion = (question, allResponses) => {
   return true;
 };
 
-//  Validation Rules 
+// Validation rules
 const validateResponse = (question, response) => {
   const { validation, type } = question;
   const value = response;
@@ -57,7 +57,7 @@ const validateResponse = (question, response) => {
   return null;
 };
 
-//  Main Component 
+// Main Component
 export default function AssessmentFormRuntime() {
   const { jobId } = useParams();
   const jobIdInt = parseInt(jobId);
@@ -69,11 +69,18 @@ export default function AssessmentFormRuntime() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ✅ Use relative or absolute API base depending on environment
+  const API_BASE =
+    import.meta.env.DEV
+      ? "/api"
+      : `${window.location.origin}/api`; // Ensures correct path on Vercel/Netlify
+
   // Fetch assessment data
   const fetchAssessment = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/assessments/${jobIdInt}`);
+      const response = await fetch(`${API_BASE}/assessments/${jobIdInt}`);
+      if (!response.ok) throw new Error(`Server returned ${response.status}`);
       const data = await response.json();
       setRuntimeState({
         assessmentStructure: data,
@@ -81,11 +88,11 @@ export default function AssessmentFormRuntime() {
         validationErrors: {},
       });
     } catch (error) {
-      console.error("Assessment fetch error:", error);
+      console.error("❌ Assessment fetch error:", error);
     } finally {
       setLoading(false);
     }
-  }, [jobIdInt]);
+  }, [API_BASE, jobIdInt]);
 
   useEffect(() => {
     fetchAssessment();
@@ -130,7 +137,7 @@ export default function AssessmentFormRuntime() {
     }
 
     try {
-      const response = await fetch(`/api/assessments/${jobIdInt}/submit`, {
+      const response = await fetch(`${API_BASE}/assessments/${jobIdInt}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -149,7 +156,7 @@ export default function AssessmentFormRuntime() {
     }
   };
 
-  //  Loading State 
+  // Loading State
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center h-[80vh] text-indigo-600">
@@ -165,9 +172,9 @@ export default function AssessmentFormRuntime() {
       </div>
     );
 
-  //  Main Form UI 
+  // Main Form UI
   return (
-    <div className="w-screen min-h-[calc(100vh-64px)] bg-linear-to-br from-indigo-50 via-white to-purple-50 py-12 px-4 sm:px-8">
+    <div className="w-screen min-h-[calc(100vh-64px)] bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4 sm:px-8">
       <motion.div
         className="max-w-5xl mx-auto bg-white shadow-2xl rounded-2xl p-10 border border-indigo-100"
         initial={{ opacity: 0, y: 40 }}
@@ -215,7 +222,7 @@ export default function AssessmentFormRuntime() {
             )
           )}
 
-          {/*  Submit Button */}
+          {/* Submit Button */}
           <div className="flex justify-center pt-4">
             <motion.button
               type="submit"
@@ -225,8 +232,8 @@ export default function AssessmentFormRuntime() {
               className={`w-full sm:w-1/2 py-3.5 rounded-xl font-semibold text-lg tracking-wide shadow-md transition-all duration-300
               ${
                 isSubmitting
-                  ? "bg-linear-to-r from-indigo-300 to-purple-300 text-gray-200 cursor-not-allowed"
-                  : "bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-indigo-300/50"
+                  ? "bg-gradient-to-r from-indigo-300 to-purple-300 text-gray-200 cursor-not-allowed"
+                  : "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-indigo-300/50"
               }`}
             >
               {isSubmitting ? (
@@ -263,5 +270,6 @@ export default function AssessmentFormRuntime() {
     </div>
   );
 }
+
 
 

@@ -19,11 +19,17 @@ function AssessmentBuilder() {
     s.questions.map((q) => q.id)
   );
 
+  // ✅ Handle API base (works for both dev + production)
+  const API_BASE =
+    import.meta.env.MODE === "development"
+      ? "/api"
+      : `${window.location.origin}/api`;
+
   // === Fetch assessment ===
   const fetchAssessment = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/assessments/${jobIdInt}`);
+      const response = await fetch(`${API_BASE}/assessments/${jobIdInt}`);
       if (!response.ok) throw new Error("Failed to fetch assessment");
       const data = await response.json();
 
@@ -44,7 +50,7 @@ function AssessmentBuilder() {
     } finally {
       setLoading(false);
     }
-  }, [jobIdInt]);
+  }, [API_BASE, jobIdInt]);
 
   useEffect(() => {
     fetchAssessment();
@@ -71,7 +77,7 @@ function AssessmentBuilder() {
     setIsSaving(true);
     setError(null);
     try {
-      const response = await fetch(`/api/assessments/${jobIdInt}`, {
+      const response = await fetch(`${API_BASE}/assessments/${jobIdInt}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(builderState),
@@ -90,7 +96,7 @@ function AssessmentBuilder() {
       return;
     try {
       setIsSaving(true);
-      const response = await fetch(`/api/assessments/${jobIdInt}`, {
+      const response = await fetch(`${API_BASE}/assessments/${jobIdInt}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to delete assessment.");
@@ -178,7 +184,7 @@ function AssessmentBuilder() {
     );
 
   return (
-    <div className="w-screen min-h-[calc(100vh-64px)] bg-linear-to-br from-indigo-50 via-white to-purple-50 p-8 overflow-y-auto">
+    <div className="w-screen min-h-[calc(100vh-64px)] bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8 overflow-y-auto">
       {/* Header */}
       <Motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -197,7 +203,7 @@ function AssessmentBuilder() {
             whileTap={{ scale: 0.96 }}
             onClick={handleDeleteAssessment}
             disabled={isSaving || builderState.sections.length === 0}
-            className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md hover:from-red-600 hover:to-red-800 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md hover:from-red-600 hover:to-red-800 transition-all disabled:opacity-50"
           >
             <Trash2 size={18} />
             Delete
@@ -209,7 +215,7 @@ function AssessmentBuilder() {
             whileTap={{ scale: 0.96 }}
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 bg-linear-to-r from-emerald-500 to-green-600 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md hover:from-emerald-600 hover:to-green-700 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md hover:from-emerald-600 hover:to-green-700 transition-all disabled:opacity-50"
           >
             <Save size={18} />
             {isSaving ? "Saving..." : "Save"}
@@ -238,7 +244,7 @@ function AssessmentBuilder() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.96 }}
               onClick={addSection}
-              className="flex items-center gap-2 bg-linear-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl shadow hover:from-indigo-600 hover:to-purple-700 transition-all"
+              className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl shadow hover:from-indigo-600 hover:to-purple-700 transition-all"
             >
               <PlusCircle size={18} /> Add Section
             </Motion.button>
@@ -288,7 +294,7 @@ function AssessmentBuilder() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => addQuestion(section.id)}
-                className="mt-4 flex items-center gap-2 bg-linear-to-r from-teal-500 to-emerald-600 text-white font-semibold px-4 py-2 rounded-xl shadow-md hover:from-teal-600 hover:to-emerald-700 transition-all"
+                className="mt-4 flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-semibold px-4 py-2 rounded-xl shadow-md hover:from-teal-600 hover:to-emerald-700 transition-all"
               >
                 <PlusCircle size={18} /> Add Question
               </Motion.button>
@@ -341,5 +347,6 @@ function AssessmentBuilder() {
 }
 
 export default AssessmentBuilder;
+
 
 

@@ -5,7 +5,6 @@ import Dexie from 'dexie';
 const db = new Dexie('TalentFlowDB');
 
 db.version(2).stores({
-  users: '++id, name, email, password',
   // Jobs: Index on id, title, status, tags, and order for filtering/sorting/reordering
   jobs: '++id, title, status, *tags, order', 
   
