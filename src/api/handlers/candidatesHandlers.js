@@ -5,13 +5,13 @@ import db from '../db/dexie';
 
 const BASE_URL = '/api';
 
-// --- Helpers ---
+// Helpers
 const simulateLatency = (min = 200, max = 1200) =>
   new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
 const shouldFail = (errorRate = 0.1) => Math.random() < errorRate;
 
-// --- GET /candidates?search=&stage=&page= ---
+//  GET /candidates?search=&stage=&page=
 export const getCandidatesHandler = http.get(`${BASE_URL}/candidates`, async ({ request }) => {
   const url = new URL(request.url);
   const search = url.searchParams.get('search')?.toLowerCase() || '';
@@ -52,7 +52,7 @@ export const getCandidatesHandler = http.get(`${BASE_URL}/candidates`, async ({ 
   );
 });
 
-// --- POST /candidates (Add Candidate) ---
+// POST /candidates (Add Candidate)
 export const postCandidateHandler = http.post(`${BASE_URL}/candidates`, async ({ request }) => {
   await simulateLatency();
 
@@ -145,7 +145,7 @@ export const updateCandidateHandler = http.patch(
   }
 );
 
-// --- GET /candidates/:id/timeline ---
+// GET /candidates/:id/timeline 
 export const getCandidateTimelineHandler = http.get(
   `${BASE_URL}/candidates/:candidateId/timeline`,
   async ({ params }) => {
@@ -173,7 +173,7 @@ export const getCandidateTimelineHandler = http.get(
   }
 );
 
-// --- Export All ---
+// Export All
 export const candidateHandlers = [
   getCandidatesHandler,
   postCandidateHandler,
