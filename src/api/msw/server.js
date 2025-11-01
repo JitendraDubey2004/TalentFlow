@@ -1,7 +1,7 @@
 // src/api/msw/server.js
 
 import { setupWorker } from 'msw/browser';
-import { handlers } from '../index';
+import { handlers } from '../handlers';
 
 let worker;
 
