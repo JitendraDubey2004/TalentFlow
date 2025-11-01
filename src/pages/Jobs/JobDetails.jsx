@@ -13,42 +13,6 @@ function JobDetails() {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  /*useEffect(() => {
-    const fetchJob = async () => {
-      setLoading(true);
-      setError(null);
-
-
-      const apiUrl = `/api/jobs/${jobId}`;
-      // ✅ Use local API in dev, fallback JSON in production
-     // const apiUrl = import.meta.env.DEV
-       // ? `/api/jobs/${jobId}`
-       // : `${window.location.origin}/mock/jobs.json`;
-
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error(`Job not found. Status: ${response.status}`);
-        const data = await response.json();
-
-        // ✅ In production, extract job from JSON list
-        const foundJob = import.meta.env.DEV
-          ? data
-          : (data.find((j) => String(j.id) === String(jobId)) || null);
-
-        if (!foundJob) throw new Error("Job not found in data file.");
-        setJob(foundJob);
-      } catch (err) {
-        console.error("Fetch job failed:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchJob();
-  }, [jobId]); */
-
-
   useEffect(() => {
   const fetchJob = async () => {
     setLoading(true);
@@ -60,7 +24,6 @@ function JobDetails() {
       const response = await fetch(apiUrl);
       if (!response.ok) throw new Error(`Job not found. Status: ${response.status}`);
 
-      // ✅ Always a single object
       const jobData = await response.json();
       setJob(jobData);
     } catch (err) {
@@ -89,7 +52,6 @@ function JobDetails() {
     try {
       const newStatus = job.status === "active" ? "archived" : "active";
 
-      // ✅ Only send PATCH in dev; in prod, just simulate change
       if (import.meta.env.DEV) {
         const response = await fetch(`/api/jobs/${jobId}`, {
           method: "PATCH",
