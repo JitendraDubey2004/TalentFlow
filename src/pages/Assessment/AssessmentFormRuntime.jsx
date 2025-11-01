@@ -69,7 +69,7 @@ export default function AssessmentFormRuntime() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ✅ Use relative or absolute API base depending on environment
+  //  Use relative or absolute API base depending on environment
   const API_BASE =
     import.meta.env.DEV
       ? "/api"
