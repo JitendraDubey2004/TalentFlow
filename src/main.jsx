@@ -1,5 +1,4 @@
-// src/main.jsx (FINAL FIXED VERSION)
-
+// src/main.jsx (FINAL FIX FOR DEPLOYMENT)
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -8,12 +7,12 @@ import './index.css';
 import { seedDatabase } from './api/seeds/seedData.js';
 
 async function main() {
-  // 🧩 Start MSW only in development mode
-  if (import.meta.env.DEV) {
+  // 🧩 Start MSW in all environments (including Vercel)
+  try {
     const { prepareMockServer } = await import('./api/msw/server.js');
     await prepareMockServer();
-  } else {
-    console.log("🚀 Production build: MSW not loaded");
+  } catch (err) {
+    console.warn("⚠️ MSW could not start:", err);
   }
 
   // 🧩 Seed mock/local data
