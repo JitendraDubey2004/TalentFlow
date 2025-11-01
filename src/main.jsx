@@ -1,4 +1,4 @@
-// src/main.jsx (FINAL FIX FOR DEPLOYMENT)
+// src/main.jsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -7,7 +7,7 @@ import './index.css';
 import { seedDatabase } from './api/seeds/seedData.js';
 
 async function main() {
-  // 🧩 Start MSW in all environments (including Vercel)
+  //  Start MSW in all environments
   try {
     const { prepareMockServer } = await import('./api/msw/server.js');
     await prepareMockServer();
@@ -15,7 +15,7 @@ async function main() {
     console.warn("⚠️ MSW could not start:", err);
   }
 
-  // 🧩 Seed mock/local data
+  //  Seed mock/local data
   await seedDatabase();
 
   ReactDOM.createRoot(document.getElementById('root')).render(
