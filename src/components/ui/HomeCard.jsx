@@ -9,7 +9,7 @@ function HomeCard({ title, description, to, icon }) {
       className="block p-6 bg-white border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:scale-[1.02]"
     >
       <div className="flex items-center space-x-4 mb-3">
-        {/* Placeholder for Icon (e.g., using a library like Heroicons) */}
+        {/* Placeholder for Icon */}
         <div className="p-3 bg-indigo-100 rounded-full text-indigo-600">
             {icon || '✨'}
         </div>
