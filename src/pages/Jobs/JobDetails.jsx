@@ -18,10 +18,12 @@ function JobDetails() {
       setLoading(true);
       setError(null);
 
+
+      const apiUrl = `/api/jobs/${jobId}`;
       // ✅ Use local API in dev, fallback JSON in production
-      const apiUrl = import.meta.env.DEV
-        ? `/api/jobs/${jobId}`
-        : `${window.location.origin}/mock/jobs.json`;
+     // const apiUrl = import.meta.env.DEV
+       // ? `/api/jobs/${jobId}`
+       // : `${window.location.origin}/mock/jobs.json`;
 
       try {
         const response = await fetch(apiUrl);
