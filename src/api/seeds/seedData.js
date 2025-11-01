@@ -16,7 +16,7 @@ const QUESTION_TYPES = [
   'file-upload',
 ];
 
-// --- Utility Generators ---
+// Utility Generators 
 
 const generateJobs = (count) => {
   const jobs = [];
@@ -89,7 +89,7 @@ const generateAssessments = (count, jobIds) => {
   return assessments;
 };
 
-// --- Main Seeder ---
+//Main Seeder 
 
 export async function seedDatabase() {
   if (!import.meta.env.DEV) {
