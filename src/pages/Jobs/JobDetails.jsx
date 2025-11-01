@@ -13,7 +13,7 @@ function JobDetails() {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
+  /*useEffect(() => {
     const fetchJob = async () => {
       setLoading(true);
       setError(null);
@@ -46,7 +46,34 @@ function JobDetails() {
     };
 
     fetchJob();
-  }, [jobId]);
+  }, [jobId]); */
+
+
+  useEffect(() => {
+  const fetchJob = async () => {
+    setLoading(true);
+    setError(null);
+
+    const apiUrl = `/api/jobs/${jobId}`;
+
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error(`Job not found. Status: ${response.status}`);
+
+      // ✅ Always a single object
+      const jobData = await response.json();
+      setJob(jobData);
+    } catch (err) {
+      console.error("Fetch job failed:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchJob();
+}, [jobId]);
+
 
   const handleArchive = async () => {
     if (
