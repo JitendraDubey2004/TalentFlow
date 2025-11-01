@@ -13,7 +13,7 @@ const simulateLatency = (min = 200, max = 1200) =>
 const shouldFail = (errorRate = import.meta.env.DEV ? 0.08 : 0) =>
   Math.random() < errorRate;
 
-// ✅ Fallback mock data for production (when Dexie is empty or blocked)
+// Fallback mock data for production (when Dexie is empty or blocked)
 const fallbackJobs = [
   {
     id: 1,
@@ -44,7 +44,7 @@ const fallbackJobs = [
   },
 ];
 
-// --- Handlers ---
+// Handlers 
 
 // GET /jobs
 export const getJobsHandler = http.get(`${BASE_URL}/jobs`, async ({ request }) => {
@@ -201,7 +201,7 @@ export const reorderJobHandler = http.patch(`${BASE_URL}/jobs/:jobId/reorder`, a
   }
 });
 
-// ✅ Export all handlers
+//  Export all handlers
 export const jobHandlers = [
   getJobsHandler,
   getJobDetailsHandler,
