@@ -17,10 +17,10 @@ function JobModal({ isOpen, onClose, jobData, onJobSubmitted }) {
 
     try {
       if (jobData?.id) {
-        // ✏️ Edit job in Dexie
+        //  Edit job in Dexie
         await db.jobs.update(jobData.id, formData);
       } else {
-        // 🚀 Add new job
+        //  Add new job
         await db.jobs.add({
           ...formData,
           createdAt: new Date().toISOString(),
