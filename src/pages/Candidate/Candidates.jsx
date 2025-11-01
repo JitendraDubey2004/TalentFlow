@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import CandidateList from "../../components/CandidateModule/CandidateList";
 import CandidateModal from "../../components/Modal/CandidateModal";
 import KanbanBoard from "../../components/CandidateModule/KanbanBoard";
-import db from "../../api/db/dexie"; // ✅ Added Dexie fallback for offline/failed API
+import db from "../../api/db/dexie"; 
 
 const CANDIDATE_STAGES = ["applied", "screen", "tech", "offer", "hired", "rejected"];
 
@@ -16,7 +16,7 @@ function Candidates() {
   const [stageFilter, setStageFilter] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // ✅ Fetch candidates (API with Dexie fallback)
+  //  Fetch candidates
   const fetchCandidates = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -30,7 +30,7 @@ function Candidates() {
       resultData = result.data;
       setCandidates(resultData);
 
-      // ✅ Sync Dexie cache
+      //  Sync Dexie cache
       await db.candidates.clear();
       await db.candidates.bulkAdd(resultData);
     } catch (err) {
@@ -50,7 +50,7 @@ function Candidates() {
     fetchCandidates();
   }, [fetchCandidates]);
 
-  // ✅ Stage update with optimistic UI + Dexie sync
+  //  Stage update with optimistic UI + Dexie sync
   const handleStageChange = async (candidateId, newStage) => {
     const candidateToUpdate = candidates.find((c) => c.id === candidateId);
     if (!candidateToUpdate) return;
@@ -68,7 +68,7 @@ function Candidates() {
 
       if (!response.ok) throw new Error("Stage transition failed.");
 
-      // ✅ Reflect in Dexie cache
+      //  Reflect in Dexie cache
       await db.candidates.update(candidateId, { stage: newStage });
     } catch (err) {
       console.error("Stage update error:", err);
@@ -77,13 +77,13 @@ function Candidates() {
     }
   };
 
-  // ✅ Add candidate handler
+  //  Add candidate handler
   const handleCandidateAdded = () => {
     fetchCandidates();
     setIsAddModalOpen(false);
   };
 
-  // ✅ Loading and error states
+  //  Loading and error states
   if (loading)
     return (
       <div className="flex items-center justify-center h-[80vh] bg-gray-50">
@@ -102,7 +102,7 @@ function Candidates() {
 
   return (
     <div className="w-screen min-h-[calc(100vh-64px)] bg-gradient-to-b from-gray-50 via-white to-gray-100 flex flex-col px-8 py-10">
-      {/* 🧭 Header */}
+      {/*  Header */}
       <div className="bg-gradient-to-r from-indigo-50 via-white to-indigo-50 py-8 px-10 rounded-3xl shadow-md mb-10 border border-gray-100">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
@@ -123,7 +123,7 @@ function Candidates() {
         </div>
       </div>
 
-      {/* ⚙️ Control bar */}
+      {/*  Control bar */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-8 p-5 bg-white rounded-2xl shadow-lg border border-gray-200">
         <div className="flex bg-gray-100 rounded-xl p-1 shadow-inner">
           <button
@@ -163,7 +163,7 @@ function Candidates() {
         </select>
       </div>
 
-      {/* 📋 Content */}
+      {/*  Content */}
       <div className="flex-1 rounded-xl shadow-sm">
         {view === "kanban" ? (
           <KanbanBoard allCandidates={candidates} onStageChange={handleStageChange} />
@@ -172,7 +172,7 @@ function Candidates() {
         )}
       </div>
 
-      {/* ➕ Add Candidate Modal */}
+      {/*  Add Candidate Modal */}
       <CandidateModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
