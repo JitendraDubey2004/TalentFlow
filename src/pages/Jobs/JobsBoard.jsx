@@ -20,12 +20,10 @@ const STATUS_COLORS = {
   archived: 'bg-amber-100 text-amber-700 border border-amber-300',
 };
 
-// ✅ Use relative base for production safety
 const getApiBase = () => {
   if (window.location.hostname === 'localhost') {
     return '/api';
   }
-  // in production, your backend should handle routes correctly
   return '/api';
 };
 
@@ -312,7 +310,7 @@ function JobsBoard() {
         </SortableContext>
       </DndContext>
 
-      {/* ✅ Pagination Fix */}
+      {/*  Pagination  */}
       <div className="flex justify-center items-center gap-4 mt-10">
         <button
           onClick={() => setPage((p) => p - 1)}
