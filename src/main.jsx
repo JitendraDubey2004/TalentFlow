@@ -1,21 +1,22 @@
-// src/main.jsx (FINAL UPDATE for setup)
+// src/main.jsx (FINAL FIXED VERSION)
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './index.css';
-
 import { seedDatabase } from './api/seeds/seedData.js';
-import { prepareMockServer } from './api/msw/server.js'; 
 
 async function main() {
- 
+  // 🧩 Start MSW only in development mode
   if (import.meta.env.DEV) {
-    await prepareMockServer(); 
+    const { prepareMockServer } = await import('./api/msw/server.js');
+    await prepareMockServer();
+  } else {
+    console.log("🚀 Production build: MSW not loaded");
   }
 
-
+  // 🧩 Seed mock/local data
   await seedDatabase();
 
   ReactDOM.createRoot(document.getElementById('root')).render(
@@ -23,7 +24,7 @@ async function main() {
       <BrowserRouter>
         <App />
       </BrowserRouter>
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 }
 
