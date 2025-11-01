@@ -23,7 +23,6 @@ function AssessmentsPage() {
       setLoading(true);
       setError(null);
 
-      // ✅ Always prefix with relative URL (works in production too)
       const jobsResponse = await fetch("/api/jobs?pageSize=1000&status=active");
 
       if (!jobsResponse.ok) throw new Error("Failed to fetch jobs.");
@@ -31,7 +30,7 @@ function AssessmentsPage() {
       const jobData = await jobsResponse.json();
       const jobIds = jobData.data.map((job) => job.id);
 
-      // ✅ Fetch assessments in parallel for each job
+      // Fetch assessments in parallel for each job
       const assessmentPromises = jobIds.map(async (jobId) => {
         const res = await fetch(`/api/assessments/${jobId}`);
         if (!res.ok) return null;
