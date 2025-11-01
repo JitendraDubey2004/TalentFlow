@@ -5,12 +5,12 @@ import db from '../db/dexie';
 
 const BASE_URL = '/api'; 
 
-// --- Simulation Helpers ---
+//  Simulation Helpers 
 const simulateLatency = (min = 200, max = 1200) => 
   new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 const shouldFail = (errorRate = 0.1) => Math.random() < errorRate;
 
-// --- API Endpoints ---
+//  API Endpoints 
 
 // GET /assessments/:jobId (Retrieve Assessment Structure)
 export const getAssessmentHandler = http.get(`${BASE_URL}/assessments/:jobId`, async ({ params }) => {
